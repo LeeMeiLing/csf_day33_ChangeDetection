@@ -40,7 +40,7 @@ export class FriendsComponent implements OnInit, OnChanges{
   //   })
   // }
 
-  private createForm(friend:Friend):FormGroup{
+  private createForm(friend:Friend | null = null):FormGroup{
     return this.fb.group({
       name:this.fb.control( friend?friend.name:'' , [Validators.required]),
       email:this.fb.control(friend?friend.email:'' ,[Validators.required,Validators.email]),
@@ -54,6 +54,25 @@ export class FriendsComponent implements OnInit, OnChanges{
     console.info('>>> fr:',fr)
     this.onFriend.next(fr)
     this.form.reset //  this will not reset the form-array, better recreate the form if it is complex form
+  }
+
+  clear(){
+    this.form = this.createForm()
+  }
+
+  // *** using function, call value()
+  // value():Friend{
+  //   return this.form.value as Friend
+  // }
+
+  // *** using getter, call as a property .value w/o ()
+  get value():Friend{
+    return this.form.value as Friend
+  }
+
+  // *** setter, not applicable for change detection
+  set value(f:Friend){
+    this.form = this.createForm(f)
   }
 
   

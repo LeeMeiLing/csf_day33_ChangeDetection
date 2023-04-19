@@ -24,7 +24,11 @@
         <tr>
             <td></td>
             <td>
-                <button type="submit" [disabled]="form.invalid">Add</button>
+                <!-- <button type="submit" [disabled]="form.invalid">Add</button> -->
+
+                <!-- content projection -->
+                <ng-content></ng-content>
+
             </td>
         </tr>
     </table>

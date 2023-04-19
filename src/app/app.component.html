@@ -1,5 +1,14 @@
 <h1>Friends App</h1>
 
-<app-friends (onFriend)="process($event)" [friend]="selectedFriend"></app-friends>
+<app-friends (onFriend)="process($event)" [friend]="selectedFriend">
+    <!-- to use the following button, must have <ng-content> in friend component -->
+    <button type="submit">Add</button>
+    <button type="button" (click)="unFriend()">Delete</button>
+</app-friends>
+
 <hr>
-<app-friends-list [friendsList]="friends" (onSelectedFriend)="selection($event)"></app-friends-list>
+
+<!-- <app-friends-list [friendsList]="friends" (onSelectedFriend)="selection($event)"></app-friends-list> -->
+
+<!-- subscribing to onSelectedFriend in ts using @ViewChild so no need (onSelectedFriend)-->
+<app-friends-list [friendsList]="friends"></app-friends-list>
