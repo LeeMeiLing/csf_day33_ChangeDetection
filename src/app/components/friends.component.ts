@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { AfterViewInit, Component, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Friend } from '../models';
 import { Subject } from 'rxjs';
@@ -8,27 +8,40 @@ import { Subject } from 'rxjs';
   templateUrl: './friends.component.html',
   styleUrls: ['./friends.component.css']
 })
-export class FriendsComponent implements OnInit, OnChanges{
+export class FriendsComponent implements OnInit, OnChanges, AfterViewInit{
 
   form!:FormGroup
 
   @Input()
   friend!:Friend
 
+  @Input()
+  onUnFriend!:any
+
   @Output()
   onFriend = new Subject<Friend>
 
-  constructor(private fb:FormBuilder){}
+  @Input() // this is needed when using property binding method as parent cant change this directly
+  readOnly = false
 
+  constructor(private fb:FormBuilder){}
+  
   ngOnInit(): void {
-    this.form = this.createForm(this.friend) // can pass in undefined argument ??
+    this.form = this.createForm(this.friend) // if pass in undefined argument,'friend' will be default to null
     console.info('friend: ',this.friend)
   }
 
+  ngAfterViewInit(): void {
+    this.onUnFriend.subscribe(
+      () => { this.clear() }
+      )
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
-    // console.log('>>> changes:', changes)
-    const fr = changes['friend'].currentValue as Friend
-    this.form = this.createForm(fr)
+    console.log('>>> changes:', changes)
+    const fr = changes['friend']?.currentValue as Friend  // fr is undefined if clear button is clicked because only [readOnly] value change, no change in [friend]
+    this.form = this.createForm(fr) // if fr is undefiend, createForm() args default is still null
+
   }
 
   // private createForm():FormGroup{
@@ -57,6 +70,7 @@ export class FriendsComponent implements OnInit, OnChanges{
   }
 
   clear(){
+    this.readOnly = false // this line not needed when using property binding method as it will be updated by "updateMode"
     this.form = this.createForm()
   }
 
@@ -65,15 +79,20 @@ export class FriendsComponent implements OnInit, OnChanges{
   //   return this.form.value as Friend
   // }
 
-  // *** using getter, call as a property .value w/o ()
-  get value():Friend{
-    return this.form.value as Friend
-  }
+  //// ======== using view child with getter & setter ========
 
-  // *** setter, not applicable for change detection
-  set value(f:Friend){
-    this.form = this.createForm(f)
-  }
+  // // *** using getter, call as a property .value w/o ()
+  // get value():Friend{
+  //   return this.form.value as Friend
+  // }
+
+  // // *** setter, not applicable for change detection
+  // set value(f:Friend){
+  //   this.readOnly = true
+  //   this.form = this.createForm(f)
+  // }
+  
+  ////==========================================================
 
   
 }

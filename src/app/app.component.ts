@@ -1,7 +1,8 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnInit, Output, ViewChild } from '@angular/core';
 import { Friend } from './models';
 import { FriendsComponent } from './components/friends.component';
 import { FriendsListComponent } from './components/friends-list.component';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -10,13 +11,18 @@ import { FriendsListComponent } from './components/friends-list.component';
 })
 export class AppComponent implements OnInit, AfterViewInit {
 
-  @ViewChild(FriendsComponent)
-  friendComp!:FriendsComponent
+  // @ViewChild(FriendsComponent)
+  // friendComp!:FriendsComponent
 
-  @ViewChild(FriendsListComponent)
-  friendsListComp!:FriendsListComponent
-  
-  selectedFriend!:Friend
+  // @ViewChild(FriendsListComponent)
+  // friendsListComp!:FriendsListComponent
+   
+  selectedFriend!:Friend  // using binding
+
+  @Output()
+  unfriendEvent = new Subject<boolean>
+
+  updateMode = false
 
   friends:Friend[] = [
     {name:'barney', email:'barney@gmail.com',phone:'23456'},
@@ -25,13 +31,15 @@ export class AppComponent implements OnInit, AfterViewInit {
 
 
   ngOnInit(): void {
-    console.info('>>>> OnInit friendComp: ', this.friendComp)
+    // console.info('>>>> OnInit friendComp: ', this.friendComp) // using view child
   }
+  
   ngAfterViewInit(): void {
-    console.info('>>>> AfterViewInit friendComp: ', this.friendComp)
-    this.friendsListComp.onSelectedFriend.subscribe(
-      v => this.selection(v)
-    )
+    //// using view child
+    // console.info('>>>> AfterViewInit friendComp: ', this.friendComp)
+    // this.friendsListComp.onSelectedFriend.subscribe(
+    //   v => this.selection(v)
+    // )
   }
 
 
@@ -47,14 +55,18 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   unFriend(){
-    let idx = this.friends.findIndex(f => f.name == this.selectedFriend.name)
+    let idx = this.friends.findIndex(f => f.name == this.selectedFriend.name) // using binding
+    // let idx = this.friends.findIndex(f => f.name == this.friendComp.value.name) // using viewchild
 
+
+    console.info('>> index: ',idx)
     if(idx == -1)
       return
 
     else
       this.friends.splice(idx,1)
-      this.friendComp.clear()
+      this.unfriendEvent.next(true) // using binding
+      // this.friendComp.clear() // using view child
 
   }
 
@@ -62,11 +74,23 @@ export class AppComponent implements OnInit, AfterViewInit {
     console.info('>>> fr selected: ',name)
     const fr = this.friends.find(f => f.name == name)
 
-    // //@ts-ignore
-    // this.selectedFriend = fr
-
+    // ======== using property binding with change detection ========
     //@ts-ignore
-    this.friendComp.value = fr // assigning fr to friend in friendComp using setter, no through input att binding
+    this.selectedFriend = fr
+    this.updateMode = true
+    // ===============================================================
+
+    // // ======== using view child ========
+    // //@ts-ignore
+    // this.friendComp.value = fr // assigning fr to friend in friendComp using setter, not through [friend]="selectedFriend" input att binding
+    // this.updateMode = true
+    // this.friendComp.readOnly = true
+    // // ==================================
+  }
+
+  clear() {
+    // this.friendComp.clear() // using view child
+    this.updateMode = false
   }
 
 }
